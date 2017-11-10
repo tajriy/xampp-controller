@@ -16,9 +16,13 @@ function input()
     return trim(fgets(STDIN));
 }
 
-function menu()
+function menu($info = "")
 {
-    $command = "sudo -S /opt/lampp/lampp";
+    echo shell_exec("clear");
+    $path = "sudo -S /opt/lampp/lampp";
+    echo $info ? "-------------------------INFORMATION----------------------------\n"
+        . "{$info}----------------------------------------------------------------\n" : "";
+    $info = "";
     echo "Welcome to XAMPP Controller\n";
     echo " [1]. Start All (Apache, MariaDB, ProFTPD)\n";
     echo " [2]. Start All (Apache, MySQL, ProFTPD)\n";
@@ -35,14 +39,14 @@ function menu()
     $menus = trim($menus, ',');
     $menuBool = $menus = preg_replace('/ /', '', $menus);
     $menus = explode(',', $menus);
-    $result = [];
+    $commands = [];
     foreach ($menus as $menu) {
         switch ($menu) {
             case 1:
-                $result += [' stop', 'sudo -S service mysql stop', ' start'];
+                $commands += [' stop', 'sudo -S service mysql stop', ' start'];
                 break;
             case 2:
-                $result += [
+                $commands += [
                     ' stop',
                     'sudo -S service mysql stop',
                     ' startapache',
@@ -51,57 +55,60 @@ function menu()
                 ];
                 break;
             case 3:
-                $result += [
+                $commands += [
                     ' stopapache',
                     ' startapache',
                 ];
                 break;
             case 4:
-                $result += [
+                $commands += [
                     ' stopmysql',
+                    'sudo -S service mysql stop',
                     ' startmysql'
                 ];
                 break;
             case 5:
-                $result += [
+                $commands += [
+                    ' stopmysql',
                     'sudo -S service mysql stop',
                     'sudo -S service mysql start',
                 ];
                 break;
             case 7:
-                $result += ["sudo -S /opt/lampp/manager-linux-x64.run"];
+                $commands += ["sudo -S /opt/lampp/manager-linux-x64.run"];
                 break;
             case 8:
-                $result += [' stop'];
+                $commands += [' stop'];
                 break;
             case 9:
-                $result += [' stop', 'sudo -S service mysql stop'];
+                $commands += [' stop', 'sudo -S service mysql stop'];
                 break;
             case 0:
+                echo shell_exec("clear");
                 exit();
                 break;
             default:
-                $result = shell_exec("clear");
-                echo "{$result}\n";
+                $commands = shell_exec("clear");
+                echo "{$commands}\n";
                 echo "---[ Anda belum memilih menu, silahkan pilih menu berikut : ]---\n\n";
                 menu();
         }
     }
 //    var_dump($result);
     if ($menuBool) {
-        foreach ($result as $comm) {
+        foreach ($commands as $command) {
             $syntax = "";
-            if (!strstr($comm, 'sudo')) {
-                $syntax = "{$command}{$comm}";
+            if (!strstr($command, 'sudo')) {
+                $syntax = "{$path}{$command}";
             } else {
-                $syntax = "{$comm}";
+                $syntax = "{$command}";
             }
 //            var_dump("COMMAND : {$syntax}");
-            echo shell_exec($syntax);
+            $info .= shell_exec($syntax);
+            $info .= "\n";
         }
-        $result = shell_exec("clear");
-        echo "{$result}\n";
-        menu();
+        echo shell_exec("clear");
+        menu($info);
     }
 }
 
